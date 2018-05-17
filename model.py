@@ -36,15 +36,16 @@ class DecoderRNN(nn.Module):
         self.linear = nn.Linear(hidden_size, vocab_size)
 
     def forward(self, features, captions):
-        print(captions.shape[1])
+#         print("caption shape:",captions.shape)
         embeddings = self.embed(captions)
-        print(embeddings.shape)
+#         print("embedding shape:",embeddings.shape)
+#         print("features shape:",features.shape, "--- unsqueezed features shape:", features.unsqueeze(1).shape)
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
-        print(embeddings.shape)
+#         print("combined features and embedding shape:",embeddings.shape)
         output, (hn, cn) = self.lstm(embeddings)
-        print(output.shape, hn.shape, cn.shape)
+#         print(output.shape, hn.shape, cn.shape)
         outputs = self.linear(output[:,1:,:])
-        print(outputs.shape)
+#         print(outputs.shape)
         return outputs
 
     def sample(self, inputs):
