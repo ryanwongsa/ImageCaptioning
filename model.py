@@ -38,10 +38,10 @@ class DecoderRNN(nn.Module):
     def forward(self, features, captions):
 #         print("caption shape:",captions.shape)
         embeddings = self.embed(captions)
-        print("embedding shape:",embeddings.shape)
-        print("features shape:",features.shape, "--- unsqueezed features shape:", features.unsqueeze(1).shape)
+#         print("embedding shape:",embeddings.shape)
+#         print("features shape:",features.shape, "--- unsqueezed features shape:", features.unsqueeze(1).shape)
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
-        print("combined features and embedding shape:",embeddings.shape)
+#         print("combined features and embedding shape:",embeddings.shape)
         output, (hn, cn) = self.lstm(embeddings)
 #         print(output.shape, hn.shape, cn.shape)
         outputs = self.linear(output[:,:-1,:])
