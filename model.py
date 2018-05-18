@@ -38,16 +38,42 @@ class DecoderRNN(nn.Module):
     def forward(self, features, captions):
 #         print("caption shape:",captions.shape)
         embeddings = self.embed(captions)
-#         print("embedding shape:",embeddings.shape)
-#         print("features shape:",features.shape, "--- unsqueezed features shape:", features.unsqueeze(1).shape)
+        print("embedding shape:",embeddings.shape)
+        print("features shape:",features.shape, "--- unsqueezed features shape:", features.unsqueeze(1).shape)
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
-#         print("combined features and embedding shape:",embeddings.shape)
+        print("combined features and embedding shape:",embeddings.shape)
         output, (hn, cn) = self.lstm(embeddings)
 #         print(output.shape, hn.shape, cn.shape)
-        outputs = self.linear(output[:,1:,:])
+        outputs = self.linear(output[:,:-1,:])
 #         print(outputs.shape)
         return outputs
 
-    def sample(self, inputs):
+    def sample(self, inputs, states=None):
         " accepts pre-processed image tensor (inputs) and returns predicted sentence (list of tensor ids of length max_len) "
-        pass
+        sampled_ids = []
+#         print("inputs:", inputs.shape)
+        for i in range(20): 
+            if i == 0:
+                output, (hiddens, states) = self.lstm(inputs) 
+                print("0:",output.shape, hiddens.shape, states.shape)
+#                 outputs = hiddens
+#                 outputs = self.embed(output) 
+#                 print(i,":",output.shape, hiddens.shape, states.shape)
+#             embedding start
+                outputs = self.embed(torch.tensor([[0]]))
+#                 print(output.shape)
+#                 print(output.data)
+            else:
+                print(i,":",outputs.shape, hiddens.shape, states.shape)
+                output, (hiddens, states) = self.lstm(outputs,(hiddens,states)) 
+#                 print("LSTM Output:",output.shape)
+                outputs = self.linear(output)  
+#                 print("Predicted Output",outputs)
+    #             print("outputs:", outputs.shape)
+                prediction = torch.argmax(outputs, dim=2)
+                print(prediction[0])
+                sampled_ids.append(prediction[0])
+                outputs = self.embed(prediction)                  
+#                 print("Embedding Output:", outputs)
+        sampled_ids = torch.stack(sampled_ids, 1)     
+        return sampled_ids
